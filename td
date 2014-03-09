@@ -1,5 +1,7 @@
 #!/usr/bin/ruby
 
+require 'io/console' # Required for reading single chars
+
 usage = "td - The todo.txt helper
 For more on the todo.txt format, see:
 https://github.com/ginatrapani/todo.txt-cli/wiki/The-Todo.txt-Format
@@ -8,13 +10,13 @@ Usage:
 
 td a <task>
   Adds a task to your todo.txt file.
-td x <task>
+td x <search string/regex>
   Completes a task. It will attempt to search for the task
-  and remove it from your todo.txt. If it finds more than
-  one, it will prompt for one or more to move to done.txt.
-td - <task>
-  Deletes a task (doesn't move to done.txt). If it finds
-  more than one, will prompt.
+  and remove it from your todo.txt. It will prompt for each
+  removal.
+td - <search string/regex>
+  Deletes a task (doesn't move to done.txt). It will prompt
+  before each removal.
 td @ <context>
   Lists tasks, filtered by context.
 td d <date>
@@ -39,36 +41,68 @@ create a new one first."
 
 command = ARGV[0]
 
+# done.txt is in the local directory by default
+done_file = 'done.txt'
+done = []
+
 # Locate todo.txt and read it in.
-if File.exists?("todo.txt")
-  todo_file = "todo.txt"
+if File.exists?('todo.txt')
+  todo_file = 'todo.txt'
 elsif File.exists?("#{Dir.home}/todo.txt")
+  done_file = "#{Dir.home}/done.txt"
   todo_file = "#{Dir.home}/todo.txt"
 else
-  puts "Todo.txt not found. Creating new one."
-  todo_file = "todo.txt"
-  File.open(todo_file, "w+").close
+  puts 'Todo.txt not found. Creating new one.'
+  todo_file = 'todo.txt'
+  File.open(todo_file, 'w+').close
 end
 
+# Read each line of todo.txt as an array element.
 todo = File.open(todo_file).readlines
 
+# Process the commands.
 case command
-when "a"
+when 'a'
   todo << ARGV[1..-1].join(' ')
-when "x"
-when "-"
-when "@"
+when 'x'
+  # Set certain tasks to complete, adding them to the 'done'
+  # variable and deleting them from the 'todo' variabl.
+  list = todo.select { |n| n =~ /#{ARGV[1..-1].join '.*'}/i }
+  list.each do |n|
+    puts "Complete '#{n.chomp}'? (y/n): "
+    yn = STDIN.getch
+    if yn.downcase[0] == 'y'
+      done << "x #{n}"
+      todo.delete_if { |a| a == n }
+    end
+  end
+when '-'
+  # Obtain a separate list of matching lines, then remove them
+  # from the todo list if they match and the user confirms.
+  list = todo.select { |n| n =~ /#{ARGV[1..-1].join '.*'}/i }
+  list.each do |n|
+    puts "Delete '#{n.chomp}'? (y/n): "
+    yn = STDIN.getch
+    if yn.downcase[0] == 'y'
+      todo.delete_if { |a| a == n }
+    end
+  end
+when '@'
   puts todo.select { |n| n =~ /@#{ARGV[1..-1].join ' '}\s/i }
-when "d"
+when 'd'
   date_test = /\d\d\d\d-\d\d-\d\d\s/
   puts todo.select { |n| n =~ date_test }.sort_by { |n| n.match(date_test).to_s }
-when "+"
+when '+'
   puts todo.select { |n| n =~ /\+#{ARGV[1..-1].join ' '}\s/i }
-when "p"
+when 'p'
   puts todo.select { |n| n =~ /^\([A-Z]\)/ }.sort
-when "s"
+when 's'
 else
   puts usage
 end
 
-File.open(todo_file, "w+").puts todo
+# Output the new todo list to todo.txt
+File.open(todo_file, 'w+').puts todo
+
+# If there are any completed tasks, output them as well
+File.open(done_file, 'a').puts done if done != []
