@@ -25,12 +25,11 @@ td + <project>
   List tasks, filtered by project.
 td p
   Lists all prioritized in order.
-td s <ext>
-  Scans all directories recursively, looking for any files
-  of the specified extension. Each file it finds, will be 
-  scanned, looking for any TODO: lines. It will add 
-  those lines to your todo.txt, along with line number and 
-  use the filename as the project, e.g. +source.rb.
+td s <file>
+  Scans files specified in the command for any lines with
+  'TODO:' and adds them to todo.txt, including line number
+  and lists the file name as the project, i.e. +source.rb.
+  File globs, such as *.rb are accepted.
 
 This script will look for a todo.txt first in your current
 directory, then in your home directory if it doesn't find
@@ -63,7 +62,7 @@ todo = File.open(todo_file).readlines
 # Process the commands.
 case command
 when 'a'
-  todo << ARGV[1..-1].join(' ')
+  todo << (ARGV[1..-1].join(' ') + "\n")
 when 'x'
   # Set certain tasks to complete, adding them to the 'done'
   # variable and deleting them from the 'todo' variabl.
@@ -71,7 +70,7 @@ when 'x'
   list.each do |n|
     puts "Complete '#{n.chomp}'? (y/n): "
     yn = STDIN.getch
-    if yn.downcase[0] == 'y'
+    if yn.downcase == 'y'
       done << "x #{n}"
       todo.delete_if { |a| a == n }
     end
@@ -83,7 +82,7 @@ when '-'
   list.each do |n|
     puts "Delete '#{n.chomp}'? (y/n): "
     yn = STDIN.getch
-    if yn.downcase[0] == 'y'
+    if yn.downcase == 'y'
       todo.delete_if { |a| a == n }
     end
   end
@@ -97,11 +96,25 @@ when '+'
 when 'p'
   puts todo.select { |n| n =~ /^\([A-Z]\)/ }.sort
 when 's'
+  files = []
+  matcher = /TODO: (.*)$/i
+  ARGV[1..-1].each { |f| files += Dir.glob(f) }
+  files.each do |f|
+    File.open(f).readlines.each do |l|
+      if l =~ matcher
+        puts "Found task '#{Regexp.last_match(1)}'"
+        todo << "#{Regexp.last_match(1)}\n"
+      end
+    end
+  end if files != []
 else
   puts usage
 end
 
-# Output the new todo list to todo.txt
+# Output the new todo list to todo.txt, and make sure
+# there are no duplicates.
+todo.uniq!
+p todo
 File.open(todo_file, 'w+').puts todo
 
 # If there are any completed tasks, output them as well
