@@ -113,9 +113,7 @@ end
 
 # Output the new todo list to todo.txt, and make sure
 # there are no duplicates.
-todo.uniq!
-p todo
-File.open(todo_file, 'w+').puts todo
+File.open(todo_file, 'w+').puts todo.uniq
 
 # If there are any completed tasks, output them as well
 File.open(done_file, 'a').puts done if done != []
