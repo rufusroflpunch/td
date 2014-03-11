@@ -9,24 +9,24 @@ About
 Usage
 -----
 
-    td a <task>
+    $ td a <task>
       Adds a task to your todo.txt file.
-    td x <search string/regex>
+    $ td x <search string/regex>
       Completes a task. It will attempt to search for the task
       and remove it from your todo.txt. It will prompt for each
       removal.
-    td - <search string/regex>
+    $ td - <search string/regex>
       Deletes a task (doesn't move to done.txt). It will prompt
       before each removal.
-    td @ <context>
+    $ td @ <context>
       Lists tasks, filtered by context.
-    td d <date>
+    $ td d <date>
       Lists tasks, filtered by creation date.
-    td + <project>
+    $ td + <project>
       List tasks, filtered by project.
-    td p
+    $ td p
       Lists all prioritized in order.
-    td s <file>
+    $ td s <file>
       Scans files specified in the command for any lines with
       'TODO:' and adds them to todo.txt, including line number
       and lists the file name as the project, i.e. +source.rb.
