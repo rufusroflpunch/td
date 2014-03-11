@@ -100,10 +100,11 @@ when 's'
   matcher = /TODO: (.*)$/i
   ARGV[1..-1].each { |f| files += Dir.glob(f) }
   files.each do |f|
-    File.open(f).readlines.each do |l|
+    fo = File.open(f).readlines
+    fo.each do |l|
       if l =~ matcher
         puts "Found task '#{Regexp.last_match(1)}'"
-        todo << "#{Regexp.last_match(1)}\n"
+        todo << "#{Regexp.last_match(1)}. Line #{fo.index(l) + 1}. +#{File.basename f}\n"
       end
     end
   end if files != []
