@@ -39,25 +39,28 @@ use a separate todo.txt for a specific project, make sure you
 create a new one first."
 
 command = ARGV[0]
-
-# done.txt is in the local directory by default
-done_file = 'done.txt'
 done = []
 
-# Locate todo.txt and read it in.
+# Default to home dir first for todo.txt
+done_file = "#{Dir.home}/done.txt"
+todo_file = "#{Dir.home}/todo.txt"
+
+# Home dir is overridden by environment variable
+if ENV['TODOTXT']
+  done_file = File.dirname(ENV['TODOTXT']) + '/done.txt'
+  todo_file = ENV['TODOTXT']
+end
+
+# Lastly, the environment variable is overridden by
+# a local file in that folder.
 if File.exists?('todo.txt')
+  done_file = 'done.txt'
+  done = []
   todo_file = 'todo.txt'
-elsif File.exists?("#{Dir.home}/todo.txt")
-  done_file = "#{Dir.home}/done.txt"
-  todo_file = "#{Dir.home}/todo.txt"
-else
-  puts 'Todo.txt not found. Creating new one.'
-  todo_file = 'todo.txt'
-  File.open(todo_file, 'w+').close
 end
 
 # Read each line of todo.txt as an array element.
-todo = File.open(todo_file).readlines
+todo = File.open(todo_file, 'a+').readlines
 
 # Process the commands.
 case command

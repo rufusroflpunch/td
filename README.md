@@ -32,4 +32,10 @@ Usage
       and lists the file name as the project, i.e. +source.rb.
       File globs, such as *.rb, are accepted.
 
-This script will look for a todo.txt first in your current directory, then in your home directory if it does not find one. At that point, it will only use the done.txt in that same directory, or it will create a new one. If you want to use a separate todo.txt for a specific project, make sure you create a new one first, if you already have one in your home folder.
+This application can use different todo.txt files depending on their location. Here is the file locations of todo.txt in order of precedence:
+
+1) Local folder: This is always used if it exists.
+2) Environment variable $TODOTXT
+3) Home folder (~/todo.txt)
+
+If it doesn't locate one, it will create a todo.txt it in the directory of lowest precedence. It will always use the done.txt for completed that is located in the same directory as todo.txt, or create a new one.
