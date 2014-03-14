@@ -2,7 +2,19 @@
 
 require 'io/console' # Required for reading single chars
 
-usage = "td - The todo.txt helper
+begin
+  require 'colorize'
+rescue LoadError
+  # If it can't load the gem, just override the colorize method
+  # so that it doesn't do anything. Hacky.... or elegant? You decide!
+  class String
+    def colorize(dummy)
+      self
+    end
+  end
+end
+
+usage = "td 0.1 - The todo.txt helper
 For more on the todo.txt format, see:
 https://github.com/ginatrapani/todo.txt-cli/wiki/The-Todo.txt-Format
 
@@ -40,6 +52,10 @@ create a new one first."
 
 command = ARGV[0]
 done = []
+PRIORITY_REGEX = /^\(\w\)/
+DATE_REGEX = /\d{4}-?\d\d-?\d\d/
+PROJECT_REGEX = /\+\S+/
+CONTEXT_REGEX = /\@\w+/
 
 # Default to home dir first for todo.txt
 done_file = "#{Dir.home}/done.txt"
@@ -68,7 +84,7 @@ when 'a'
   todo << (ARGV[1..-1].join(' ') + "\n")
 when 'x'
   # Set certain tasks to complete, adding them to the 'done'
-  # variable and deleting them from the 'todo' variabl.
+  # variable and deleting them from the 'todo' variable.
   list = todo.select { |n| n =~ /#{ARGV[1..-1].join '.*'}/i }
   list.each do |n|
     puts "Complete '#{n.chomp}'? (y/n): "
@@ -90,14 +106,25 @@ when '-'
     end
   end
 when '@'
-  puts todo.select { |n| n =~ /@#{ARGV[1..-1].join ' '}\s/i }
+  contexts = todo.select { |n| n =~ /@#{ARGV[1..-1].join ' '}/i }
+  contexts.each do |s|
+    puts s.gsub(CONTEXT_REGEX) { |m| m.colorize(:red) }
+  end
 when 'd'
-  date_test = /\d\d\d\d-\d\d-\d\d\s/
-  puts todo.select { |n| n =~ date_test }.sort_by { |n| n.match(date_test).to_s }
+  dates = todo.select { |n| n =~ DATE_REGEX }.sort_by { |n| n.match(DATE_REGEX).to_s }
+  dates.each do |s|
+    puts s.gsub(DATE_REGEX) { |m| m.colorize(:magenta) }
+  end
 when '+'
-  puts todo.select { |n| n =~ /\+#{ARGV[1..-1].join ' '}\s/i }
+  projects = todo.select { |n| n =~ /\+#{ARGV[1..-1].join ' '}\s/i }
+  projects.each do |s|
+    puts s.gsub(PROJECT_REGEX) { |m| m.colorize(:yellow) }
+  end
 when 'p'
-  puts todo.select { |n| n =~ /^\([A-Z]\)/ }.sort
+  priorities = todo.select { |n| n =~ /^\([A-Z]\)/ }.sort
+  priorities.each do |s|
+    puts s.gsub(PRIORITY_REGEX) { |m| m.colorize(:green) }
+  end
 when 's'
   files = []
   matcher = /TODO: (.*)$/i

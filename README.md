@@ -38,4 +38,4 @@ This application can use different todo.txt files depending on their location. H
 2) Environment variable $TODOTXT
 3) Home folder (~/todo.txt)
 
-If it doesn't locate one, it will create a todo.txt it in the directory of lowest precedence. It will always use the done.txt for completed that is located in the same directory as todo.txt, or create a new one.
+If it doesn't locate one, it will create a todo.txt it in the directory of lowest precedence. It will always use the done.txt for completed tasks that is located in the same directory as todo.txt, or create a new one.
