@@ -106,7 +106,7 @@ when '-'
     end
   end
 when '@'
-  contexts = todo.select { |n| n =~ /@#{ARGV[1..-1].join ' '}/i }
+  contexts = todo.select { |n| n =~ /@#{ARGV[1..-1].join ' ' || ""}/i }
   contexts.each do |s|
     puts s.gsub(CONTEXT_REGEX) { |m| m.colorize(:red) }
   end
@@ -116,7 +116,7 @@ when 'd'
     puts s.gsub(DATE_REGEX) { |m| m.colorize(:magenta) }
   end
 when '+'
-  projects = todo.select { |n| n =~ /\+#{ARGV[1..-1].join ' '}\s/i }
+  projects = todo.select { |n| n =~ /\+#{ARGV[1..-1].join ' ' || ""}/i }
   projects.each do |s|
     puts s.gsub(PROJECT_REGEX) { |m| m.colorize(:yellow) }
   end
