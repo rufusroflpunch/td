@@ -6,6 +6,8 @@ About
 
 **td** was created to help manage my todo.txt files. You know what I mean, everyone has one. A list of things in your code or document you need to do, or to fix. A few years ago, Gina Trapani invented a [format](http://todotxt.com/) for todo.txt that has become a standard for many. This script was created to assist with that. This was written and tested with Ruby 2.1, but it should work with most recent versions of Ruby.
 
+NOTE: This scripts supports colorization by default if you have the colorization gem installed.
+
 Usage
 -----
 
