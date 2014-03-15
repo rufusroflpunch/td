@@ -41,14 +41,12 @@ td s <file>
   Scans files specified in the command for any lines with
   'TODO:' and adds them to todo.txt, including line number
   and lists the file name as the project, i.e. +source.rb.
-  File globs, such as *.rb are accepted.
+  File globs, such as *.rb are accepted."
 
-This script will look for a todo.txt first in your current
-directory, then in your home directory if it doesn't find
-one. At that point, it will only use the done.txt in that
-same directory, or it will create a new one. If you want to
-use a separate todo.txt for a specific project, make sure you
-create a new one first."
+
+##################################
+# VARIABLE DECLARATIONS
+##################################
 
 command = ARGV[0]
 done = []
@@ -56,6 +54,26 @@ PRIORITY_REGEX = /^\(\w\)/
 DATE_REGEX = /\d{4}-?\d\d-?\d\d/
 PROJECT_REGEX = /\+\S+/
 CONTEXT_REGEX = /\@\w+/
+
+#################################
+# METHODS
+#################################
+
+# This program rewrites the todo list at the end every time,
+# so it duplicates the list to avoid gsubbing the ANSI codes
+# into the actual list that prints back into the file.
+def colorize_str(str)
+  s = str.dup
+  s.gsub!(CONTEXT_REGEX) { |m| m.colorize(:red) }
+  s.gsub!(PROJECT_REGEX) { |m| m.colorize(:yellow) }
+  s.gsub!(DATE_REGEX) { |m| m.colorize(:magenta) }
+  s.gsub!(PRIORITY_REGEX) { |m| m.colorize(:green) }
+  s
+end
+
+#################################
+# MAIN PROGRAM
+################################# 
 
 # Default to home dir first for todo.txt
 done_file = "#{Dir.home}/done.txt"
@@ -149,20 +167,3 @@ File.open(todo_file, 'w+').puts todo.uniq
 # If there are any completed tasks, output them as well
 File.open(done_file, 'a').puts done if done != []
 
-
-
-# This function fully colorizes a string. Yes, yes, I know begin blocks
-# are a sub-optimal design feature. So sue me! I'm doing it because
-# it makes the code more readable (allowing me to keep the methods
-# defined at the end of the script).
-
-BEGIN {
-  def colorize_str(str)
-    s = str.dup
-    s.gsub!(CONTEXT_REGEX) { |m| m.colorize(:red) }
-    s.gsub!(PROJECT_REGEX) { |m| m.colorize(:yellow) }
-    s.gsub!(DATE_REGEX) { |m| m.colorize(:magenta) }
-    s.gsub!(PRIORITY_REGEX) { |m| m.colorize(:green) }
-    s
-  end
-}
