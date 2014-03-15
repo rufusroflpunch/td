@@ -108,22 +108,22 @@ when '-'
 when '@'
   contexts = todo.select { |n| n =~ /@#{ARGV[1..-1].join ' ' || ""}/i }
   contexts.each do |s|
-    puts s.gsub(CONTEXT_REGEX) { |m| m.colorize(:red) }
+    puts colorize_str(s)
   end
 when 'd'
   dates = todo.select { |n| n =~ DATE_REGEX }.sort_by { |n| n.match(DATE_REGEX).to_s }
   dates.each do |s|
-    puts s.gsub(DATE_REGEX) { |m| m.colorize(:magenta) }
+    puts colorize_str(s)
   end
 when '+'
   projects = todo.select { |n| n =~ /\+#{ARGV[1..-1].join ' ' || ""}/i }
   projects.each do |s|
-    puts s.gsub(PROJECT_REGEX) { |m| m.colorize(:yellow) }
+    puts colorize_str(s)
   end
 when 'p'
   priorities = todo.select { |n| n =~ /^\([A-Z]\)/ }.sort
   priorities.each do |s|
-    puts s.gsub(PRIORITY_REGEX) { |m| m.colorize(:green) }
+    puts colorize_str(s)
   end
 when 's'
   files = []
@@ -148,3 +148,21 @@ File.open(todo_file, 'w+').puts todo.uniq
 
 # If there are any completed tasks, output them as well
 File.open(done_file, 'a').puts done if done != []
+
+
+
+# This function fully colorizes a string. Yes, yes, I know begin blocks
+# are a sub-optimal design feature. So sue me! I'm doing it because
+# it makes the code more readable (allowing me to keep the methods
+# defined at the end of the script).
+
+BEGIN {
+  def colorize_str(str)
+    s = str.dup
+    s.gsub!(CONTEXT_REGEX) { |m| m.colorize(:red) }
+    s.gsub!(PROJECT_REGEX) { |m| m.colorize(:yellow) }
+    s.gsub!(DATE_REGEX) { |m| m.colorize(:magenta) }
+    s.gsub!(PRIORITY_REGEX) { |m| m.colorize(:green) }
+    s
+  end
+}
